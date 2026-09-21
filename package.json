@@ -1,0 +1,32 @@
+{
+  "name": "antigravity-rtl-patcher",
+  "version": "2.0.0",
+  "description": "Smart Right-to-Left (RTL) Patcher with UI widget and font support for Persian, Arabic, and Hebrew in Google Antigravity.",
+  "main": "patcher.js",
+  "bin": {
+    "antigravity-rtl-patcher": "cli.js"
+  },
+  "scripts": {
+    "start": "node cli.js",
+    "patch": "node cli.js --patch",
+    "unpatch": "node cli.js --unpatch",
+    "restore": "node cli.js --unpatch",
+    "status": "node cli.js --status",
+    "editor": "node cli.js --editor"
+  },
+  "keywords": [
+    "antigravity",
+    "rtl",
+    "persian",
+    "arabic",
+    "hebrew",
+    "vazirmatn",
+    "patcher",
+    "electron"
+  ],
+  "author": "Antigravity RTL Community",
+  "license": "MIT",
+  "dependencies": {
+    "@electron/asar": "^4.3.0"
+  }
+}
