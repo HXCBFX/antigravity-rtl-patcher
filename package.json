@@ -12,7 +12,8 @@
     "unpatch": "node cli.js --unpatch",
     "restore": "node cli.js --unpatch",
     "status": "node cli.js --status",
-    "editor": "node cli.js --editor"
+    "editor": "node cli.js --editor",
+    "upload": "node github-uploader.js"
   },
   "keywords": [
     "antigravity",
