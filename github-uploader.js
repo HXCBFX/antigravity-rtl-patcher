@@ -130,12 +130,20 @@ module.exports = {
 };
 
 if (require.main === module) {
-    const token = process.argv[2] || process.env.GITHUB_TOKEN;
+    const os = require('os');
+    let token = process.argv[2] || process.env.GITHUB_TOKEN;
+    if (!token) {
+        const tokenFile = path.join(os.homedir(), '.github_token');
+        if (fs.existsSync(tokenFile)) {
+            token = fs.readFileSync(tokenFile, 'utf8').trim();
+        }
+    }
     if (!token) {
         console.error('Usage: node github-uploader.js <GITHUB_PERSONAL_ACCESS_TOKEN>');
         process.exit(1);
     }
-    uploadProjectToPrivateRepo(token).catch(err => {
+    const repoName = process.argv[3] || 'antigravity-rtl-patcher';
+    uploadProjectToPrivateRepo(token, repoName).catch(err => {
         console.error('Upload failed:', err);
         process.exit(1);
     });
