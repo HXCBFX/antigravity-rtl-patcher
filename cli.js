@@ -3,6 +3,7 @@
 const readline = require('readline');
 const { AntigravityRtlPatcher } = require('./patcher');
 const { updateEditorSettings } = require('./src/editor-config');
+const { enableAutoPatch, disableAutoPatch, isAutoPatchEnabled } = require('./setup-auto-patch');
 
 // ANSI Colors
 const C = {
@@ -38,6 +39,7 @@ function prompt(query) {
 
 async function handleStatus(patcher) {
     const status = patcher.getStatus();
+    const autoPatchActive = isAutoPatchEnabled();
     console.log(`${C.yellow}📋 وضعیت فعلی / Current Status:${C.reset}`);
     if (!status.installed) {
         console.log(`  ❌ ${C.red}برنامه آنتی‌گرویتی یافت نشد / Antigravity not found.${C.reset}`);
@@ -47,6 +49,7 @@ async function handleStatus(patcher) {
     console.log(`  📦 فایل پکیج / ASAR: ${C.cyan}${status.asarPath}${C.reset}`);
     console.log(`  💾 فایل پشتیبان / Backup: ${status.hasBackup ? `${C.green}موجود است (Yes)${C.reset}` : `${C.red}وجود ندارد (No)${C.reset}`}`);
     console.log(`  ⚡ وضعیت پچ / Patched: ${status.isPatched ? `${C.green}فعال (Applied)${C.reset}` : `${C.yellow}اعمال نشده (Not patched)${C.reset}`}`);
+    console.log(`  🔄 پچ خودکار پس از آپدیت‌ها / Auto-Patch: ${autoPatchActive ? `${C.green}فعال (Enabled)${C.reset}` : `${C.yellow}غیرفعال (Disabled)${C.reset}`}`);
     console.log(`  🚀 در حال اجرا / Running: ${status.isRunning ? `${C.yellow}بله (Running)${C.reset}` : `${C.green}خیر (Closed)${C.reset}`}\n`);
 }
 
@@ -102,10 +105,11 @@ async function interactiveMenu(patcher) {
         console.log(`  ${C.green}1)${C.reset} اعمال پچ راست‌چین (Patch RTL - Persian / Arabic / Hebrew)`);
         console.log(`  ${C.yellow}2)${C.reset} بازگردانی نسخه اصلی کارخانه (Restore / Unpatch)`);
         console.log(`  ${C.blue}3)${C.reset} بروزرسانی تنظیمات و فونت ادیتور (Update Editor Settings)`);
-        console.log(`  ${C.magenta}4)${C.reset} بررسی مجدد وضعیت (Refresh Status)`);
-        console.log(`  ${C.red}5)${C.reset} خروج (Exit)\n`);
+        console.log(`  ${C.cyan}4)${C.reset} فعال/غیرفعال‌سازی پچ خودکار هنگام ورود به ویندوز (Toggle Auto-Patch)`);
+        console.log(`  ${C.magenta}5)${C.reset} بررسی مجدد وضعیت (Refresh Status)`);
+        console.log(`  ${C.red}6)${C.reset} خروج (Exit)\n`);
 
-        const choice = await prompt(`${C.bright}لطفاً یک گزینه را انتخاب کنید [1-5]: ${C.reset}`);
+        const choice = await prompt(`${C.bright}لطفاً یک گزینه را انتخاب کنید [1-6]: ${C.reset}`);
 
         if (choice === '1') {
             await handlePatch(patcher);
@@ -117,8 +121,17 @@ async function interactiveMenu(patcher) {
             await handleEditor();
             await prompt(`${C.cyan}کلید Enter را برای ادامه فشار دهید...${C.reset}`);
         } else if (choice === '4') {
+            if (isAutoPatchEnabled()) {
+                const res = disableAutoPatch();
+                console.log(`\n${C.yellow}✅ ${res.message}${C.reset}\n`);
+            } else {
+                const res = enableAutoPatch();
+                console.log(`\n${C.green}✅ ${res.message}${C.reset}\n`);
+            }
+            await prompt(`${C.cyan}کلید Enter را برای ادامه فشار دهید...${C.reset}`);
+        } else if (choice === '5') {
             // Refreshes loop
-        } else if (choice === '5' || choice.toLowerCase() === 'q') {
+        } else if (choice === '6' || choice.toLowerCase() === 'q') {
             console.log(`\n${C.green}خدانگهدار! / Goodbye!${C.reset}\n`);
             break;
         } else {
@@ -143,6 +156,14 @@ async function main() {
     } else if (args.includes('--editor') || args.includes('-e')) {
         banner();
         await handleEditor();
+    } else if (args.includes('--autopatch') || args.includes('-a')) {
+        banner();
+        const res = enableAutoPatch();
+        console.log(`\n${C.green}✅ ${res.message} (${res.method})${C.reset}\n`);
+    } else if (args.includes('--disable-autopatch')) {
+        banner();
+        const res = disableAutoPatch();
+        console.log(`\n${C.yellow}✅ ${res.message}${C.reset}\n`);
     } else {
         await interactiveMenu(patcher);
     }
